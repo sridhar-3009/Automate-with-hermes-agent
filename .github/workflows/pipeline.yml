@@ -35,7 +35,7 @@ jobs:
 
       - name: Stage 2 — Fetch Images
         env:
-          UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
         run: python stages/fetch_images.py
 
       - name: Stage 3 — Compose Slides

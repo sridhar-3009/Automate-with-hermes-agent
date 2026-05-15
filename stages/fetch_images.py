@@ -4,7 +4,7 @@ import requests
 import os
 import time
 
-UNSPLASH_ACCESS_KEY = os.environ["UNSPLASH_ACCESS_KEY"]
+PEXELS_API_KEY = os.environ["PEXELS_API_KEY"]
 
 STOICISM_QUERIES = [
     "ancient greek architecture dark moody",
@@ -19,23 +19,23 @@ STOICISM_QUERIES = [
     "stone wall texture weathered ancient",
 ]
 
-def fetch_unsplash(query, slot_index):
-    url = "https://api.unsplash.com/search/photos"
+def fetch_pexels(query, slot_index):
+    url = "https://api.pexels.com/v1/search"
     params = {
         "query": query,
         "per_page": 10,
         "orientation": "portrait",
-        "client_id": UNSPLASH_ACCESS_KEY,
     }
-    res = requests.get(url, params=params, timeout=15)
+    headers = {"Authorization": PEXELS_API_KEY}
+    res = requests.get(url, params=params, headers=headers, timeout=15)
     res.raise_for_status()
-    photos = res.json()["results"]
+    photos = res.json().get("photos", [])
     if not photos:
         print(f"  No results for query: {query}")
         return None
 
     photo = photos[slot_index % len(photos)]
-    img_url = photo["urls"]["regular"]
+    img_url = photo["src"]["large"]
     img_res = requests.get(img_url, timeout=30)
     img_res.raise_for_status()
 
@@ -53,7 +53,7 @@ def run():
     image_paths = []
     for i, query in enumerate(STOICISM_QUERIES):
         print(f"  Fetching slot {i+1}/10: {query}")
-        path = fetch_unsplash(query, i)
+        path = fetch_pexels(query, i)
         if path:
             image_paths.append(path)
         time.sleep(0.3)
