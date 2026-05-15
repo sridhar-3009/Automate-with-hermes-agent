@@ -20,6 +20,8 @@ def upload_slide(file_path):
         json={"fileName": name, "fileType": "image/jpeg"},
         timeout=15,
     )
+    if not res.ok:
+        print(f"Presign failed {res.status_code}: {res.text}")
     res.raise_for_status()
     data = res.json()
     upload_url = data["uploadUrl"]
