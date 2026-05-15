@@ -17,7 +17,7 @@ def upload_slide(file_path):
     res = requests.post(
         f"{BASE_URL}/media/presign",
         headers=HEADERS,
-        json={"fileName": name, "fileType": "image/jpeg"},
+        json={"filename": name, "contentType": "image/jpeg"},
         timeout=15,
     )
     if not res.ok:
