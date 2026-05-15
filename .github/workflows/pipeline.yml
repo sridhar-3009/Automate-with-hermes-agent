@@ -2,7 +2,7 @@ name: Instagram Stoicism Pipeline
 
 on:
   schedule:
-    - cron: '0 10 * * *'
+    - cron: '30 4 * * *'
   workflow_dispatch:
 
 jobs:
