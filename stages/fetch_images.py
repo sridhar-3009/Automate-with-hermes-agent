@@ -20,7 +20,7 @@ STOICISM_QUERIES = [
     "stone wall texture weathered ancient",
 ]
 
-def fetch_pexels(query):
+def fetch_pexels(query, slot_index):
     page = random.randint(1, 5)
     url = "https://api.pexels.com/v1/search"
     params = {
@@ -56,7 +56,7 @@ def run():
     image_paths = []
     for i, query in enumerate(STOICISM_QUERIES):
         print(f"  Fetching slot {i+1}/10: {query}")
-        path = fetch_pexels(query)
+        path = fetch_pexels(query, i)
         if path:
             image_paths.append(path)
         time.sleep(0.3)
