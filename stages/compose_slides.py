@@ -6,18 +6,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 CANVAS_W, CANVAS_H = 1080, 1350
 
-SLIDE_CONTENT = [
-    {"type": "hook", "text": None},  # filled from hooks.json
-    {"type": "tip", "text": "Most people react.\nThe Stoic responds."},
-    {"type": "tip", "text": "You control your thoughts.\nNot outcomes."},
-    {"type": "tip", "text": "Discomfort is\nthe price of growth."},
-    {"type": "tip", "text": "Memento mori.\nDeath makes today matter."},
-    {"type": "tip", "text": "Amor fati.\nLove what happens to you."},
-    {"type": "tip", "text": "The obstacle\nis the way. Always."},
-    {"type": "tip", "text": "Ego is the enemy\nof progress."},
-    {"type": "tip", "text": "Strong mind.\nCalm spirit. Clear action."},
-    {"type": "cta", "text": "Save this.\nCome back when life gets hard."},
-]
+CTA_TEXT = "Save this.\nCome back when life gets hard."
 
 def get_font(size, bold=False):
     candidates = [
@@ -96,7 +85,11 @@ def run():
     hooks_data = json.loads(pathlib.Path("data/current_run/hooks.json").read_text())
     image_data = json.loads(pathlib.Path("data/current_run/image_paths.json").read_text())
 
-    SLIDE_CONTENT[0]["text"] = hooks_data["selected"]["text"]
+    # Build slide content dynamically from Claude-generated texts
+    slide_content = [{"type": "hook", "text": hooks_data["selected"]["text"]}]
+    for tip in hooks_data["slides"][:8]:
+        slide_content.append({"type": "tip", "text": tip})
+    slide_content.append({"type": "cta", "text": CTA_TEXT})
 
     out_dir = pathlib.Path("data/current_run/slides")
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -104,7 +97,7 @@ def run():
     images = image_data["images"]
     slide_paths = []
 
-    for i, (content, img_path) in enumerate(zip(SLIDE_CONTENT, images)):
+    for i, (content, img_path) in enumerate(zip(slide_content, images)):
         slide = compose_slide(img_path, content, i + 1)
         out_path = out_dir / f"slide_{i+1:02d}.jpg"
         slide.save(str(out_path), "JPEG", quality=95)
