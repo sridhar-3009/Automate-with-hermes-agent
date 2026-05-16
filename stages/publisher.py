@@ -2,7 +2,7 @@ import json
 import pathlib
 import os
 import requests
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 ZERNIO_API_KEY = os.environ["ZERNIO_API_KEY"]
 ZERNIO_ACCOUNT_ID = os.environ["ZERNIO_ACCOUNT_ID"]
@@ -47,11 +47,14 @@ def run():
         media_items.append({"type": "image", "url": public_url})
         print(f"  Uploaded: {pathlib.Path(path).name}")
 
+    # Schedule 5 min from now — API returns instantly, Zernio publishes async
+    scheduled_at = (datetime.now(timezone.utc) + timedelta(minutes=5)).strftime("%Y-%m-%dT%H:%M:%S")
+
     payload = {
         "content": caption_data["caption"],
         "mediaItems": media_items,
         "platforms": [{"platform": "instagram", "accountId": ZERNIO_ACCOUNT_ID}],
-        "publishNow": True,
+        "scheduledFor": scheduled_at,
     }
 
     res = requests.post(f"{BASE_URL}/posts", headers=HEADERS, json=payload, timeout=120)
@@ -63,14 +66,15 @@ def run():
     log_entry = {
         "post_id": post_id,
         "hook": hooks_data["selected"]["text"],
-        "published_at": datetime.now(timezone.utc).isoformat(),
+        "scheduled_at": scheduled_at,
+        "created_at": datetime.now(timezone.utc).isoformat(),
         "slide_count": len(slides),
     }
     log_file = pathlib.Path("data/posts_log.jsonl")
     with open(log_file, "a") as f:
         f.write(json.dumps(log_entry) + "\n")
 
-    print(f"Published. Post ID: {post_id}")
+    print(f"Post queued: {post_id}, publishes at: {scheduled_at} UTC")
 
 if __name__ == "__main__":
     run()
