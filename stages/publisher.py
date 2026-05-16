@@ -54,7 +54,7 @@ def run():
         "publishNow": True,
     }
 
-    res = requests.post(f"{BASE_URL}/posts", headers=HEADERS, json=payload, timeout=30)
+    res = requests.post(f"{BASE_URL}/posts", headers=HEADERS, json=payload, timeout=120)
     if not res.ok:
         print(f"Post failed {res.status_code}: {res.text}")
     res.raise_for_status()
