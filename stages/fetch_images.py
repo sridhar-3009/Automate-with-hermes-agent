@@ -3,6 +3,7 @@ import pathlib
 import requests
 import os
 import time
+import random
 
 PEXELS_API_KEY = os.environ["PEXELS_API_KEY"]
 
@@ -19,11 +20,13 @@ STOICISM_QUERIES = [
     "stone wall texture weathered ancient",
 ]
 
-def fetch_pexels(query, slot_index):
+def fetch_pexels(query):
+    page = random.randint(1, 5)
     url = "https://api.pexels.com/v1/search"
     params = {
         "query": query,
-        "per_page": 10,
+        "per_page": 15,
+        "page": page,
         "orientation": "portrait",
     }
     headers = {"Authorization": PEXELS_API_KEY}
@@ -34,7 +37,7 @@ def fetch_pexels(query, slot_index):
         print(f"  No results for query: {query}")
         return None
 
-    photo = photos[slot_index % len(photos)]
+    photo = random.choice(photos)
     img_url = photo["src"]["large"]
     img_res = requests.get(img_url, timeout=30)
     img_res.raise_for_status()
@@ -53,7 +56,7 @@ def run():
     image_paths = []
     for i, query in enumerate(STOICISM_QUERIES):
         print(f"  Fetching slot {i+1}/10: {query}")
-        path = fetch_pexels(query, i)
+        path = fetch_pexels(query)
         if path:
             image_paths.append(path)
         time.sleep(0.3)
