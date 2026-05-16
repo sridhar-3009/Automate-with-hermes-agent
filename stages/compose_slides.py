@@ -55,29 +55,45 @@ def compose_slide(img_path, content, slide_num):
     text = content["text"]
     slide_type = content["type"]
 
+    PADDING = 80  # px from each side
+
+    def wrap_and_fit(raw_text, base_size, wrap_width, line_height_ratio=1.3):
+        """Wrap text and shrink font until all lines fit within canvas width."""
+        size = base_size
+        while size > 24:
+            font = get_font(size, bold=True)
+            # Flatten \n then re-wrap at wrap_width chars
+            flat = raw_text.replace("\n", " ")
+            lines = textwrap.wrap(flat, width=wrap_width)
+            # Check no line exceeds canvas width minus padding
+            max_w = max(draw.textbbox((0,0), l, font=font)[2] for l in lines)
+            if max_w <= CANVAS_W - PADDING * 2:
+                line_h = int(size * line_height_ratio)
+                return font, lines, line_h
+            size -= 4
+        font = get_font(size, bold=True)
+        flat = raw_text.replace("\n", " ")
+        lines = textwrap.wrap(flat, width=wrap_width)
+        return font, lines, int(size * line_height_ratio)
+
+    small = get_font(30)
+
     if slide_type == "hook":
-        font = get_font(68, bold=True)
-        lines = textwrap.wrap(text, width=16)
-        total_h = len(lines) * 85
-        draw_centered_text(draw, lines, font, (CANVAS_H - total_h) // 2, 85)
-        small = get_font(30)
-        draw.text((40, CANVAS_H - 55), f"{slide_num} / 10", font=small, fill=(180, 180, 180))
+        font, lines, line_h = wrap_and_fit(text, 68, 18)
+        total_h = len(lines) * line_h
+        draw_centered_text(draw, lines, font, (CANVAS_H - total_h) // 2, line_h)
 
     elif slide_type == "cta":
-        font = get_font(60, bold=True)
-        lines = text.split("\n")
-        total_h = len(lines) * 75
-        draw_centered_text(draw, lines, font, (CANVAS_H - total_h) // 2, 75)
-        small = get_font(30)
-        draw.text((40, CANVAS_H - 55), f"{slide_num} / 10", font=small, fill=(180, 180, 180))
+        font, lines, line_h = wrap_and_fit(text, 60, 20)
+        total_h = len(lines) * line_h
+        draw_centered_text(draw, lines, font, (CANVAS_H - total_h) // 2, line_h)
 
     else:
-        font = get_font(56, bold=True)
-        lines = text.split("\n")
-        total_h = len(lines) * 70
-        draw_centered_text(draw, lines, font, (CANVAS_H - total_h) // 2, 70)
-        small = get_font(30)
-        draw.text((40, CANVAS_H - 55), f"{slide_num} / 10", font=small, fill=(180, 180, 180))
+        font, lines, line_h = wrap_and_fit(text, 56, 22)
+        total_h = len(lines) * line_h
+        draw_centered_text(draw, lines, font, (CANVAS_H - total_h) // 2, line_h)
+
+    draw.text((40, CANVAS_H - 55), f"{slide_num} / 10", font=small, fill=(180, 180, 180))
 
     return img
 
